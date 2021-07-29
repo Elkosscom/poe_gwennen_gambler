@@ -1,7 +1,8 @@
+from configparser import ConfigParser
+from os import getcwd, listdir
+
 import pandas as pd
 from requests import get
-from configparser import ConfigParser
-from os import listdir, getcwd
 
 
 class Config:

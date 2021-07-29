@@ -1,9 +1,10 @@
-import pyautogui as ag
 import keyboard
-import classes
-import pyperclip
 import pandas as pd
+import pyautogui as ag
+import pyperclip
 import tabulate  # Force to include in pyinstaller
+
+import classes
 
 
 def get_items(grid) -> pd.DataFrame:

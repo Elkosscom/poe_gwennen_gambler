@@ -1,8 +1,10 @@
-import logic
-from loguru import logger
-import warnings
+from warnings import filterwarnings
 
-warnings.filterwarnings('ignore')
+from loguru import logger
+
+import logic
+
+filterwarnings('ignore')
 
 logger.add("log.log", rotation="1 MB", enqueue=True, backtrace=True, diagnose=True)
 
