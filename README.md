@@ -1,4 +1,4 @@
-# poe_gwennen_bases
+# Gwennen Gambler
 
 This small program will check each item in the Gwennen shop (item gamble) according and show small stats according to poe.ninja.
 Should be safe as it does not any send any serverside actions, only copies the item data to clipboard.
