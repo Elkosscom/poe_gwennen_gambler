@@ -131,3 +131,9 @@ dmypy.json
 config.ini
 prices.json
 .vscode/
+
+blacklist.txt
+fated_uniques.txt
+test.py
+test.ipynb
+resolutions.txt
