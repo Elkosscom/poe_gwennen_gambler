@@ -6,6 +6,8 @@ import tabulate  # Force to include in pyinstaller
 
 import classes
 
+output_dataframe = pd.DataFrame()
+
 
 def get_items(grid) -> pd.DataFrame:
     item_list = []
@@ -17,8 +19,8 @@ def get_items(grid) -> pd.DataFrame:
         except IndexError:
             pass
     items = pd.DataFrame().from_records(item_list)
+    items = items[["base", "Item Class"]]
     items.drop_duplicates(inplace=True)
-    items = items[["base", "Item Class", "Item Level"]]
     return items
 
 
@@ -57,12 +59,10 @@ def display_items(
     items: pd.DataFrame,
     prices: pd.DataFrame,
     cfg: classes.Config = classes.Config().load_config(),
-) -> None:
-    prices["Items"] = 1
-    min_chaos = float(cfg["Prices"].get("MinimumMeanChaosValue"))
-    if cfg["Prices"].get("UnlinkedOnly") == "True":
-        prices = prices.loc[prices["links"].isna()]
+) -> pd.DataFrame:
 
+    global output_dataframe
+    min_chaos = float(cfg["Prices"].get("MinimumMeanChaosValue"))
     prices = prices.pivot_table(
         values=["chaosValue", "Items"],
         index="baseType",
@@ -74,7 +74,9 @@ def display_items(
     merge = merge.sort_values(by=("chaosValue", "mean"), ascending=False)
     merge = merge.loc[merge[("chaosValue", "mean")] >= min_chaos]
     merge = format_final_df(merge)
+    output_dataframe = merge.copy()
     print(merge.to_markdown(mode="github", index=False))
+    merge.to_csv("sample_df.csv", index=False)
 
 
 def main() -> None:
@@ -96,3 +98,5 @@ def main() -> None:
         keyboard.wait(continue_on_key)
         items = get_items(grid=grid)
         display_items(items=items, prices=prices, cfg=cfg)
+
+output_dataframe = pd.read_csv('sample_df.csv')
