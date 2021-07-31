@@ -15,14 +15,21 @@ class Config:
             "MouseMoveDelay": "0.01",
             "Language": "EN",
             "League": "Expedition",
+            "WindowTitle": "Path of Exile",
         }
         self.prices_defaults = {
             "UnlinkedOnly": "True",
             "MinimumMeanChaosValue": "0.0",
             "IgnoreFatedUniques": "True",
             "UseBlacklist": "True",
+            "MinItemLevelRestriction": "False",
         }
-        self.screen_defaults = self.get_grid_position()
+        self.screen_defaults = {
+            "GridTopLeftCornerX": "310",
+            "GridTopLeftCornerY": "262",
+            "GridBottomRightCornerX": "943",
+            "GridBottomRightCornerY": "841",
+        }
         self.sections = {
             "Base": self.base_defaults,
             "Prices": self.prices_defaults,
@@ -32,7 +39,7 @@ class Config:
             self.create_config()
         self.verify_config()
 
-    def create_config(self):
+    def create_config(self) -> None:
         print("Setting up config.")
         cfg = ConfigParser()
         cfg.optionxform = str
@@ -63,7 +70,7 @@ class Config:
         self.save_config(cfg)
 
     @staticmethod
-    def get_display_size():
+    def get_display_size() -> tuple:
         import tkinter
 
         root = tkinter.Tk()
@@ -75,7 +82,7 @@ class Config:
         root.destroy()
         return width, height
 
-    def get_grid_position(self, screen_x: int = None, screen_y: int = None) -> None:
+    def get_grid_position(self, screen_x: int = None, screen_y: int = None) -> dict:
         width, height = screen_x, screen_y
         if screen_x is None or screen_y is None:
             width, height = self.get_display_size()
@@ -83,24 +90,24 @@ class Config:
         ratios = {
             16
             / 9: {
-                "GridTopLeftCornerX": 0.1613 * width,
-                "GridTopLeftCornerY": 0.2418 * height,
-                "GridBottomRightCornerX": 0.4914 * width,
-                "GridBottomRightCornerY": 0.7793 * height,
+                "GridTopLeftCornerX": str(0.1613 * width),
+                "GridTopLeftCornerY": str(0.2418 * height),
+                "GridBottomRightCornerX": str(0.4914 * width),
+                "GridBottomRightCornerY": str(0.7793 * height),
             },
             24
             / 10: {
-                "GridTopLeftCornerX": 0.2487 * width,
-                "GridTopLeftCornerY": 0.2406 * height,
-                "GridBottomRightCornerX": 0.4948 * width,
-                "GridBottomRightCornerY": 0.7813 * height,
+                "GridTopLeftCornerX": str(0.2487 * width),
+                "GridTopLeftCornerY": str(0.2406 * height),
+                "GridBottomRightCornerX": str(0.4948 * width),
+                "GridBottomRightCornerY": str(0.7813 * height),
             },
             16
             / 10: {
-                "GridTopLeftCornerX": 0.1238 * width,
-                "GridTopLeftCornerY": 0.2429 * height,
-                "GridBottomRightCornerX": 0.4893 * width,
-                "GridBottomRightCornerY": 0.7781 * height,
+                "GridTopLeftCornerX": str(0.1238 * width),
+                "GridTopLeftCornerY": str(0.2429 * height),
+                "GridBottomRightCornerX": str(0.4893 * width),
+                "GridBottomRightCornerY": str(0.7781 * height),
             },
         }
         if not width / height in ratios:
@@ -148,7 +155,7 @@ class Item:
         self.text = text
         self.parse()
 
-    def parse(self):
+    def parse(self) -> None:
         sections = self.text.split("--------")
         section_1 = sections[0].split("\n")
         base_type = section_1[2].strip("\n \r")
@@ -183,17 +190,17 @@ class Prices:
         prices["Items"] = 1
         cfg = Config().load_config()
         ignores = Blacklist().read_ignore_lists()
-        prices['Fated'] = False
-        prices['Blacklisted'] = False
+        prices["Fated"] = False
+        prices["Blacklisted"] = False
         if cfg["Prices"].get("UnlinkedOnly") == "True":
             prices = prices.loc[prices["links"].isna()]
         if cfg["Prices"].get("IgnoreFatedUniques") == "True":
-            prices.loc[prices["name"].isin(ignores["fated"]),'Fated'] = True
+            prices.loc[prices["name"].isin(ignores["fated"]), "Fated"] = True
         if cfg["Prices"].get("UseBlacklist") == "True":
-            prices.loc[prices["name"].isin(ignores["blacklist"]), 'Blacklisted'] = True
+            prices.loc[prices["name"].isin(ignores["blacklist"]), "Blacklisted"] = True
         if show_ignored:
             return prices
-        return prices.loc[(prices['Fated']==False) & (prices['Blacklisted']==False)]
+        return prices.loc[(prices["Fated"] == False) & (prices["Blacklisted"] == False)]
 
 
 class Blacklist:
@@ -227,9 +234,16 @@ class Blacklist:
         }
 
     @staticmethod
-    def add_to_blacklist(item_names:list) -> None:
+    def add_to_blacklist(item_names: list) -> None:
         with open("blacklist.txt", "a") as f:
             for item in item_names:
+                f.write(f"\n{item}")
+
+    def remove_from_blacklist(self, item_names: list) -> None:
+        existing = [item.strip(" \n") for item in self.read_ignore_lists()["blacklist"]]
+        new_blacklist = [item for item in existing if item not in item_names]
+        with open("blacklist.txt", "w") as f:
+            for item in new_blacklist:
                 f.write(f"\n{item}")
 
 

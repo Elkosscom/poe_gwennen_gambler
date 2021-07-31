@@ -2,11 +2,16 @@ import keyboard
 import pandas as pd
 import pyautogui as ag
 import pyperclip
-import tabulate  # Force to include in pyinstaller
+from win32gui import GetForegroundWindow, GetWindowText
 
 import classes
 
-output_dataframe = pd.DataFrame()
+output_dataframe = pd.DataFrame(
+    columns=["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max"],
+    data=[["", "", "", "", "", "",]],
+)
+status = False
+refresh = False
 
 
 def get_items(grid) -> pd.DataFrame:
@@ -19,8 +24,8 @@ def get_items(grid) -> pd.DataFrame:
         except IndexError:
             pass
     items = pd.DataFrame().from_records(item_list)
-    items = items[["base", "Item Class"]]
     items.drop_duplicates(inplace=True)
+    items = items[["base", "Item Level"]]
     return items
 
 
@@ -43,15 +48,7 @@ def format_final_df(df) -> pd.DataFrame:
         inplace=True,
     )
     return df[
-        [
-            "Base",
-            "Item Class",
-            "Item Level",
-            "Items",
-            "Chaos Min",
-            "Chaos Average",
-            "Chaos Max",
-        ]
+        ["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max",]
     ]
 
 
@@ -74,12 +71,14 @@ def display_items(
     merge = merge.sort_values(by=("chaosValue", "mean"), ascending=False)
     merge = merge.loc[merge[("chaosValue", "mean")] >= min_chaos]
     merge = format_final_df(merge)
-    output_dataframe = merge.copy()
-    print(merge.to_markdown(mode="github", index=False))
-    merge.to_csv("sample_df.csv", index=False)
+    output_dataframe = merge[
+        ["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max",]
+    ].round(1)
 
 
-def main() -> None:
+def main(queue) -> None:
+    global status
+    global refresh
     cfg = classes.Config().load_config()
     ag.PAUSE = float(cfg["Base"].get("MouseMoveDelay"))
     lang = cfg["Base"].get("Language", fallback="EN")
@@ -91,12 +90,20 @@ def main() -> None:
     prices = classes.Prices().load_prices()
     continue_on_key = cfg["Base"].get("Hotkey")
     grid = classes.TradingWindow().get_grid()
-
+    pyperclip.copy(" ")
+    status = True
     while True:
-        pyperclip.copy(" ")
-        print(f"Waiting for {continue_on_key} press...")
-        keyboard.wait(continue_on_key)
-        items = get_items(grid=grid)
-        display_items(items=items, prices=prices, cfg=cfg)
-
-output_dataframe = pd.read_csv('sample_df.csv')
+        try:
+            stop_thread = queue.get(timeout=0.00001)
+        except Exception:
+            stop_thread = False
+        if stop_thread:
+            print("stopping")
+            status = False
+            return None
+        if keyboard.is_pressed(continue_on_key) and GetWindowText(
+            GetForegroundWindow()
+        ) == cfg["Base"].get("WindowTitle"):
+            items = get_items(grid=grid)
+            display_items(items=items, prices=prices, cfg=cfg)
+            refresh = True
