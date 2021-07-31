@@ -4,10 +4,10 @@ This small program will check each item in the Gwennen shop (item gamble) accord
 Should be safe as it does not any send any serverside actions, only copies the item data to clipboard.
 It does not filter any uniques (The Saviour is included in table even though it may not be possible to gamble it)
 
-**Demonstration**: https://youtu.be/yNBgLTj2bTg
+**Demonstration (Please watch before first running it)**: https://www.youtube.com/watch?v=KvKKiI-TdD8
 
 # Important
-First version is guaranteed to work on Windows single-screen 1080p setups, although my friend can run with two screens (still 1080p). Possible to set it up for different resolution ([link](https://imgur.com/a/W9MsGh1)). 
+Should work out of the box for all resolutions with aspect ratios 16:9, 16:10, 24:10. If you have different resolution, or it does not work for you, please follow this quick guide to set it up.([link](https://imgur.com/a/W9MsGh1)). 
 
 # Installation
 1. Download latest release
