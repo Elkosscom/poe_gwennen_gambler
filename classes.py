@@ -23,6 +23,7 @@ class Config:
             "IgnoreFatedUniques": "True",
             "UseBlacklist": "True",
             "MinItemLevelRestriction": "False",
+            "SortBy":'Chaos Average'
         }
         self.screen_defaults = {
             "GridTopLeftCornerX": "310",
@@ -40,7 +41,6 @@ class Config:
         self.verify_config()
 
     def create_config(self) -> None:
-        print("Setting up config.")
         cfg = ConfigParser()
         cfg.optionxform = str
         for key in self.sections:
@@ -173,7 +173,6 @@ class Prices:
             self.fetch_prices()
 
     def fetch_prices(self, league: str = "Standard", language: str = "EN") -> None:
-        print("Fetching prices from poe.ninja")
         categories = ["UniqueWeapon", "UniqueArmour", "UniqueAccessory", "UniqueJewel"]
         df = pd.DataFrame()
         for cat in categories:
@@ -185,7 +184,6 @@ class Prices:
         df.to_json("prices.json")
 
     def load_prices(self, show_ignored: bool = False) -> pd.DataFrame:
-        print("Loading saved prices")
         prices = pd.read_json("prices.json")
         prices["Items"] = 1
         cfg = Config().load_config()
@@ -249,7 +247,7 @@ class Blacklist:
 
 class VersionCheck:
     def __init__(self) -> None:
-        self.version = 1.0
+        self.version = 1.1
         self.latest_version = self.get_latest_version()
 
     @staticmethod

@@ -7,8 +7,16 @@ from win32gui import GetForegroundWindow, GetWindowText
 import classes
 
 output_dataframe = pd.DataFrame(
-    columns=["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max"],
-    data=[["", "", "", "", "", "",]],
+    columns=[
+        "Base",
+        "Item Level",
+        "Items",
+        "Chaos Min",
+        "Chaos Average",
+        "Chaos Max",
+        "Expected Chaos",
+    ],
+    data=[["", "", "", "", "", "", ""]],
 )
 status = False
 refresh = False
@@ -35,7 +43,7 @@ def format_final_df(df) -> pd.DataFrame:
         if isinstance(col, str):
             new_cols.append(col)
         else:
-            new_cols.append(f"{col[0]} {col[1]}")
+            new_cols.append(f"{col[0]} {col[1]}".strip())
     df.columns = new_cols
     df.rename(
         columns={
@@ -48,7 +56,15 @@ def format_final_df(df) -> pd.DataFrame:
         inplace=True,
     )
     return df[
-        ["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max",]
+        [
+            "Base",
+            "Item Level",
+            "Items",
+            "Chaos Min",
+            "Chaos Average",
+            "Chaos Max",
+            "Expected Chaos",
+        ]
     ]
 
 
@@ -60,20 +76,38 @@ def display_items(
 
     global output_dataframe
     min_chaos = float(cfg["Prices"].get("MinimumMeanChaosValue"))
+    prices["ev_helper"] = prices["chaosValue"] * prices["listingCount"]
     prices = prices.pivot_table(
-        values=["chaosValue", "Items"],
+        values=["chaosValue", "Items", "ev_helper", "listingCount"],
         index="baseType",
-        aggfunc={"chaosValue": ["mean", "min", "max"], "Items": "sum"},
+        aggfunc={
+            "chaosValue": ["mean", "min", "max"],
+            "Items": "sum",
+            "ev_helper": "sum",
+            "listingCount": "sum",
+        },
+    )
+    prices["Expected Chaos"] = (
+        prices[("ev_helper", "sum")] / prices[("listingCount", "sum")]
     )
     merge = pd.merge(
         items, prices.reset_index(), left_on="base", right_on="baseType", how="left"
     )
-    merge = merge.sort_values(by=("chaosValue", "mean"), ascending=False)
     merge = merge.loc[merge[("chaosValue", "mean")] >= min_chaos]
     merge = format_final_df(merge)
+    sort_by = cfg["Prices"].get("SortBy")
+    merge = merge.sort_values(by=sort_by, ascending=False)
     output_dataframe = merge[
-        ["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max",]
-    ].round(1)
+        [
+            "Base",
+            "Item Level",
+            "Items",
+            "Chaos Min",
+            "Chaos Average",
+            "Chaos Max",
+            "Expected Chaos",
+        ]
+    ].round({"Chaos Min": 1, "Chaos Average": 1, "Chaos Max": 1, "Expected Chaos": 3})
 
 
 def main(queue) -> None:
@@ -98,7 +132,6 @@ def main(queue) -> None:
         except Exception:
             stop_thread = False
         if stop_thread:
-            print("stopping")
             status = False
             return None
         if keyboard.is_pressed(continue_on_key) and GetWindowText(

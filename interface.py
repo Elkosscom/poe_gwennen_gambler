@@ -24,8 +24,16 @@ class MainWindow:
     def __init__(self) -> None:
         self.cfg = classes.Config().load_config()
         table = logic.output_dataframe[
-            ["Base", "Item Level", "Items", "Chaos Min", "Chaos Average", "Chaos Max"]
-        ].round(1)
+            [
+                "Base",
+                "Item Level",
+                "Items",
+                "Chaos Min",
+                "Chaos Average",
+                "Chaos Max",
+                "Expected Chaos",
+            ]
+        ]
         data = table.values.tolist()
         headers = table.columns.tolist()
         self.layout = [
@@ -42,7 +50,7 @@ class MainWindow:
                     display_row_numbers=False,
                     auto_size_columns=False,
                     num_rows=20,
-                    col_widths=[27, 10, 5, 10, 10, 10],
+                    col_widths=[26, 10, 5, 10, 10, 10,12],
                     select_mode=sg.TABLE_SELECT_MODE_BROWSE,
                     k="table",
                 )
@@ -54,7 +62,7 @@ class MainWindow:
             layout=self.layout,
             resizable=True,
             finalize=True,
-            size=(700, 500),
+            size=(800, 500),
         )
         self.window["table"].expand(True, True, True)
         self.window["start"].expand(True, True)
@@ -69,7 +77,7 @@ class MainWindow:
             event, values = self.window.read(timeout=1000)
             try:
                 selected = values["table"]
-            except IndexError:
+            except (IndexError, TypeError):
                 selected = None
             if logic.refresh:
                 self.window["table"].update(
@@ -268,6 +276,12 @@ class ConfigEditor:
                 readonly=True,
                 k="MinItemLevelRestriction",
             ),
+            "SortBy": sg.Combo(
+                ["Average Chaos", "Expected Chaos"],
+                cfg["Prices"].get("SortBy"),
+                readonly=True,
+                k="SortBy",
+            ),
             "GridTopLeftCornerX": sg.Input(
                 cfg["Screen"].get("GridTopLeftCornerX"),
                 size=(4, 1),
@@ -319,4 +333,5 @@ if __name__ == "__main__":
     try:
         MainWindow().main_loop()
     except Exception:
-        logger.exception('Uncaught Exception happened')
+        logger.exception("Uncaught Exception happened")
+
