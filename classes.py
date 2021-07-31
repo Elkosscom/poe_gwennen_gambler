@@ -23,7 +23,7 @@ class Config:
             "IgnoreFatedUniques": "True",
             "UseBlacklist": "True",
             "MinItemLevelRestriction": "False",
-            "SortBy":'Chaos Average'
+            "SortBy": "Chaos Average",
         }
         self.screen_defaults = {
             "GridTopLeftCornerX": "310",
@@ -185,6 +185,8 @@ class Prices:
 
     def load_prices(self, show_ignored: bool = False) -> pd.DataFrame:
         prices = pd.read_json("prices.json")
+        prices["name"] = prices["name"].str.strip()
+        prices["name"] = prices["name"].apply(capwords)
         prices["Items"] = 1
         cfg = Config().load_config()
         ignores = Blacklist().read_ignore_lists()
@@ -193,9 +195,12 @@ class Prices:
         if cfg["Prices"].get("UnlinkedOnly") == "True":
             prices = prices.loc[prices["links"].isna()]
         if cfg["Prices"].get("IgnoreFatedUniques") == "True":
-            prices.loc[prices["name"].isin(ignores["fated"]), "Fated"] = True
+            prices.loc[prices["name"].isin(set(ignores["fated"])), "Fated"] = True
         if cfg["Prices"].get("UseBlacklist") == "True":
-            prices.loc[prices["name"].isin(ignores["blacklist"]), "Blacklisted"] = True
+            print(set(ignores["blacklist"]))
+            prices.loc[
+                prices["name"].isin(set(ignores["blacklist"])), "Blacklisted"
+            ] = True
         if show_ignored:
             return prices
         return prices.loc[(prices["Fated"] == False) & (prices["Blacklisted"] == False)]
@@ -247,7 +252,7 @@ class Blacklist:
 
 class VersionCheck:
     def __init__(self) -> None:
-        self.version = 1.1
+        self.version = 1.2
         self.latest_version = self.get_latest_version()
 
     @staticmethod

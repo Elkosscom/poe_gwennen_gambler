@@ -1,3 +1,5 @@
+from string import capwords
+
 import keyboard
 import pandas as pd
 import pyautogui as ag

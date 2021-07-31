@@ -50,7 +50,7 @@ class MainWindow:
                     display_row_numbers=False,
                     auto_size_columns=False,
                     num_rows=20,
-                    col_widths=[26, 10, 5, 10, 10, 10,12],
+                    col_widths=[26, 10, 5, 10, 10, 10, 12],
                     select_mode=sg.TABLE_SELECT_MODE_BROWSE,
                     k="table",
                 )
