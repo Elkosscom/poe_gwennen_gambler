@@ -13,10 +13,10 @@ Should work out of the box for all resolutions with aspect ratios 16:9, 16:10, 2
 1. Download latest release
 2. Copy the Gwennen Gambler to any folder
 3. Run Gambler
-4. Wait until console window says "Waiting for (hotkey) press..."
+4. Click Edit config, click on Autodetect resolution
 5. Go to Gwennen, open her shop and press (hotkey)
 6. Do not move your mouse until it goes to last slot
-7. Alt-tab to small con sole window
+7. Alt-tab to main window
 
 ***
 ## Config Options
