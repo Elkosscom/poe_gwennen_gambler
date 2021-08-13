@@ -1,5 +1,3 @@
-from string import capwords
-
 import keyboard
 import pandas as pd
 import pyautogui as ag
@@ -73,7 +71,7 @@ def format_final_df(df) -> pd.DataFrame:
 def display_items(
     items: pd.DataFrame,
     prices: pd.DataFrame,
-    cfg: classes.Config = classes.Config().load_config(),
+    cfg: classes.Config,
 ) -> pd.DataFrame:
 
     global output_dataframe

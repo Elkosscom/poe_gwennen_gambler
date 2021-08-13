@@ -42,7 +42,7 @@ class MainWindow:
                 sg.Button("Stop program", k="stop", disabled=True),
                 sg.Button("Edit Config", k="config"),
             ],
-            [sg.Text("Status:"), sg.Text("Stopped", k="status"),],
+            [sg.Text("Status:"), sg.Text("Stopped", k="status")],
             [
                 sg.Table(
                     values=data,
@@ -81,7 +81,8 @@ class MainWindow:
                 selected = None
             if logic.refresh:
                 self.window["table"].update(
-                    values=logic.output_dataframe.values.tolist(), select_rows=selected,
+                    values=logic.output_dataframe.values.tolist(),
+                    select_rows=selected,
                 )
                 logic.refresh = False
 
@@ -334,4 +335,3 @@ if __name__ == "__main__":
         MainWindow().main_loop()
     except Exception:
         logger.exception("Uncaught Exception happened")
-

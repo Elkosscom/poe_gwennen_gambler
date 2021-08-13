@@ -36,7 +36,7 @@ class Config:
             "Prices": self.prices_defaults,
             "Screen": self.screen_defaults,
         }
-        if not "config.ini" in listdir(getcwd()):
+        if "config.ini" not in listdir(getcwd()):
             self.create_config()
         self.verify_config()
 
@@ -65,7 +65,7 @@ class Config:
         for section in self.sections:
             section_dict = self.sections[section]
             for key in section_dict:
-                if not key in cfg[section].keys():
+                if key not in cfg[section].keys():
                     cfg[section].update({key: section_dict[key]})
         self.save_config(cfg)
 
@@ -169,7 +169,7 @@ class Item:
 
 class Prices:
     def __init__(self) -> None:
-        if not "prices.json" in listdir(getcwd()):
+        if "prices.json" not in listdir(getcwd()):
             self.fetch_prices()
 
     def fetch_prices(self, league: str = "Standard", language: str = "EN") -> None:
@@ -222,7 +222,7 @@ class Blacklist:
 
     @staticmethod
     def set_up_blacklist() -> None:
-        with open("blacklist.txt", "w") as f:
+        with open("blacklist.txt", "w"):
             pass
 
     @staticmethod
@@ -269,4 +269,3 @@ class VersionCheck:
         webbrowser.open(
             f"https://github.com/Elkosscom/poe_gwennen_gambler/releases/tag/{self.latest_version}"
         )
-
