@@ -1,8 +1,9 @@
+import sys
+
 import keyboard
 import pandas as pd
 import pyautogui as ag
 import pyperclip
-from win32gui import GetForegroundWindow, GetWindowText
 
 import classes
 
@@ -20,6 +21,9 @@ output_dataframe = pd.DataFrame(
 )
 status = False
 refresh = False
+
+if sys.platform == "win32":
+    from win32gui import GetForegroundWindow, GetWindowText
 
 
 def get_items(grid) -> pd.DataFrame:
@@ -134,9 +138,12 @@ def main(queue) -> None:
         if stop_thread:
             status = False
             return None
-        if keyboard.is_pressed(continue_on_key) and GetWindowText(
-            GetForegroundWindow()
-        ) == cfg["Base"].get("WindowTitle"):
+        if keyboard.is_pressed(continue_on_key) and sys.platform == "win32":
+            if GetWindowText(GetForegroundWindow()) == cfg["Base"].get("WindowTitle"):
+                items = get_items(grid=grid)
+                display_items(items=items, prices=prices, cfg=cfg)
+                refresh = True
+        elif keyboard.keyboard(continue_on_key):
             items = get_items(grid=grid)
             display_items(items=items, prices=prices, cfg=cfg)
             refresh = True
