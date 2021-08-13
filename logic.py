@@ -139,6 +139,7 @@ def main(queue) -> None:
             status = False
             return None
         if keyboard.is_pressed(continue_on_key) and sys.platform == "win32":
+            keyboard.release(continue_on_key)
             if GetWindowText(GetForegroundWindow()) == cfg["Base"].get("WindowTitle"):
                 items = get_items(grid=grid)
                 display_items(items=items, prices=prices, cfg=cfg)
